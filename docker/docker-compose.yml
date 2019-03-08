@@ -1,0 +1,38 @@
+version: '2'
+services:
+  mysql:
+    image: mysql/mysql-server:${MYSQL_VERSION}
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=letmein!
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - ../database:/var/lib/mysql
+    networks:
+      - freelance
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ../code:/app:cached
+      - ../docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      - mysql
+    networks:
+      - freelance
+
+  php:
+    image: ${PHP_IMAGE}
+    environment:
+      XDEBUG_CONFIG: remote_host=${XDEBUG_REMOTE_HOST} remote_enable=1 remote_connect_back=0
+    volumes:
+      - ../code:/app:cached
+    networks:
+      - freelance
+
+networks:
+  freelance:
